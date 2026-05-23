@@ -1,0 +1,32 @@
+using System.Data;
+using Microsoft.Data.SqlClient;
+
+class Program
+{
+    static void Main()
+    {
+        DataTable table = new DataTable();
+
+        table.Columns.Add("Id", typeof(int));
+        table.Columns.Add("Name", typeof(string));
+
+        table.Rows.Add(1, "Alice");
+        table.Rows.Add(2, "Bob");
+
+        string connectionString =
+            "Server=localhost;Database=DataWarehouse;Trusted_Connection=True;TrustServerCertificate=True;";
+
+        using SqlConnection conn = new SqlConnection(connectionString);
+        conn.Open();
+
+        using SqlBulkCopy bulkCopy = new SqlBulkCopy(conn);
+
+        bulkCopy.DestinationTableName = "dbo.Customers";
+        bulkCopy.BatchSize = 5000;
+        bulkCopy.BulkCopyTimeout = 0;
+
+        bulkCopy.WriteToServer(table);
+
+        Console.WriteLine("Bulk insert complete.");
+    }
+}
